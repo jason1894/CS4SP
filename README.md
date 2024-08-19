@@ -19,7 +19,7 @@ If you want to train the representation models, you can run
 Which will get the related  pretrained model.
 However, we provide bash scripts for running tasks, such as Pretrain18H.sh, which will produce all pretrained models based on the resnet18 network,
 ```
-./PretrainH.sh
+./Pretrain18H.sh
 ```
 All pretrained models are saved in folder "PretrainMole". You can check the training log files in there.
 
