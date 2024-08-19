@@ -37,14 +37,14 @@ There are bash scripts for bath processing tasks
 
 We also added imbalanced dataset experiments for downstream tasks to evaluate the robustness of the model. Run the program the same way as before.
 
-<!-- ## Results
+## Results
 - Feature visuliazation 
 
-<img src="" alt="图片alt" title="CIFAR-10">
+<img src="https://github.com/jason1894/CS4SP/blob/master/plots/features.png" alt="Feature Visualization" title="CIFAR-10">
 
-- Results
+- Top-1 Accuracy
 
-<img src="" alt="图片alt" title="STL-10">
- -->
+<img src="https://github.com/jason1894/CS4SP/blob/master/plots/results.png" alt="Top-1 accuracy" title="Results">
+
 
 
