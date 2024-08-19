@@ -6,7 +6,7 @@ This project contains the experiments for CL4SP, which has two stages: pretraini
 ## Preparations
 ```
 # install dependent packages
-pip install -r requiremets.txt
+pip install -r requirements.txt
 ```
 
 ## Pretraining
