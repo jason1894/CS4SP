@@ -23,6 +23,21 @@ However, we provide bash scripts for running tasks, such as Pretrain18H.sh, whic
 ```
 All pretrained models are saved in folder "PretrainMole". You can check the training log files in there.
 
+
+## Comparisons
+We offered four recently contrastive learning methods as the compare objects, that is
+
+* [tri-factor contrastive learning (triCL)](https://openreview.net/pdf?id=BQA7wR2KBF)
+* [Unbiased supervised contrastive learning](https://openreview.net/pdf?id=Ph5cJSfD2XN)
+* [A simple framework for contrastive learning of visual representation](https://proceedings.mlr.press/v119/chen20j/chen20j.pdf)
+* [Debiased contrastive learning](https://proceedings.neurips.cc/paper_files/paper/2020/file/63c3ddcc7b23daa1e42dc41f9a44a873-Paper.pdf)
+
+For example, if you want to use the "Debiased contrastive learning" method as comparison results, you can run 
+```
+python ./pretrain.py -data ./datasets -dataset_name "cifar10" --arch "resnet18" --epochs 200 --batch_size 256 --seed 2024 --comparison --method "debiase_loss"
+```
+if you want run all comparison methods, you can modified the "Pretrain18/50.sh"  and run it like before.
+
 ## Downstream tasks
 
 With pretrained model in hand, you can go to downstream tasks, like

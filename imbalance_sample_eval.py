@@ -71,8 +71,14 @@ parser.add_argument('--device',default= torch.device('cuda' if torch.cuda.is_ava
 parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 parser.add_argument('--nloop', default=1, type=int, metavar='N',
                     help='Number of train loops contrastive learning training.')
+parser.add_argument('--comparison', action='store_true',
+                    help='use the comparison methods')
+parser.add_argument('--nosupervised', action='store_true',
+                    help='use the supervised methods')
+parser.add_argument('--method', default="sim_cl", type=str,
+                    help='the comparison methods')
 
-def imbalance_set(dataset, class_unbalance_ratio, splits):
+def unbalance_set(dataset, class_unbalance_ratio, splits):
 
     if  hasattr(dataset, 'targets'):
         targets_daset = dataset.targets
@@ -130,7 +136,10 @@ def train(model, data_train_loader, data_test_loader, args, name):
     result = []
     
     filearg = "{}_ep{:04}bt{}sp{}".format(args.arch, args.mepochs, args.mbatch_size, args.split) #may change by your need
-    log_dir = os.path.join("results_imbana", args.dataset_name, "multiclass", str(args.nloop), filearg)
+    if args.comparison:
+        log_dir = os.path.join("results_imbana", args.method, args.dataset_name, "multiclass", str(args.nloop), filearg)
+    else:
+        log_dir = os.path.join("results_imbana", args.dataset_name, "multiclass", str(args.nloop), filearg)
     writer = SummaryWriter(log_dir=log_dir)
     # Todo save the config file
     n_iter = 0
@@ -224,8 +233,10 @@ def main():
     # reload the checkpoint
     path1 = "{}_ep{:04}bt{}".format(args.arch, args.mepochs, args.mbatch_size)
     filename = "CP_{}ep{:04}bt{}.pth.tar".format(args.arch, args.mepochs, args.mbatch_size)
-    checkpointpath = os.path.join("PretrainModel", args.dataset_name, path1, filename)
-
+    if args.comparison:
+        checkpointpath = os.path.join("PretrainModel", args.method, args.dataset_name, path1, filename)
+    else:
+        checkpointpath = os.path.join("PretrainModel", args.dataset_name, path1, filename)
     checkpoint = torch.load(checkpointpath, map_location= args.device)  
       
     state_dict = checkpoint['state_dict']
@@ -255,11 +266,13 @@ def main():
     
     # 多分类 unbalance subset
     # trian data 
-    with open('imbalance_config.yaml', 'r') as file:
+    with open('unbalance_config.yaml', 'r') as file:
         yaml_config = yaml.safe_load(file)   
+    # args.add_argument('--unbalance_ratio', type=parse_dict, default=yaml_config.get('config1'),
+    #                 help="Configuration as a dictionary (JSON format)")
     setattr(args, "unbalance_ratio", yaml_config.get('config3'))
 
-    Binary_train, _ = imbalance_set(TrmTrainset, args.unbalance_ratio, args.split)
+    Binary_train, _ = unbalance_set(TrmTrainset, args.unbalance_ratio, args.split)
     Binary_test = TrmTestset
 
     print("len of train:", Binary_train.__len__())
@@ -277,9 +290,10 @@ def main():
     print("CL task")
     train(clmodel, Binary_train_Loader, Binary_test_Loader, args, name = "CL")
 
-    # SUP
-    print("super task")
-    train(supmodel, Binary_train_Loader, Binary_test_Loader, args, name = "SP")
+    if not args.comparison or not args.nosupervised:
+        # SUP
+        print("super task")
+        train(supmodel, Binary_train_Loader, Binary_test_Loader, args, name = "SP")
 
 
 if __name__ == "__main__":

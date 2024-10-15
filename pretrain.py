@@ -9,6 +9,7 @@ from torchvision import models
 from data_aug.cl_dataset import CLDataset, set_seed
 from models.resnet_bcl import ResNetBCLR
 from bclr import BCLR
+from compcl import COMPCL
 
 
 models_names = sorted(name for name in models.__dict__
@@ -56,6 +57,10 @@ parser.add_argument('--temperature', default=0.07, type=float,
                     help='softmax temperature (default: 0.07)')
 # parser.add_argument('--n-views', default=2, type=int, metavar='N',
 #                     help='Number of views for contrastive learning training.')
+parser.add_argument('--comparison', action='store_true',
+                    help='use the comparision methods')
+parser.add_argument('--method', default="sim_cl", type=str,
+                    help='the comparison methods')
 parser.add_argument('--device',default= torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 
@@ -87,8 +92,12 @@ def main():
                                                            last_epoch= -1)
 
     with torch.cuda.device(args.gpu_index):
-        bclr = BCLR(model = model, optimizer= optimizer, scheduler = scheduler, args=args)
-        bclr.pretrain(train_loader = train_Loder)
+        if args.comparison: 
+            compcl = COMPCL(model = model, optimizer= optimizer, scheduler = scheduler, args=args)
+            compcl.pretrain(train_loader = train_Loder)
+        else:    
+            bclr = BCLR(model = model, optimizer= optimizer, scheduler = scheduler, args=args)
+            bclr.pretrain(train_loader = train_Loder)
 
 
 if __name__ == "__main__":

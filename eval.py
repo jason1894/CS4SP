@@ -72,6 +72,12 @@ parser.add_argument('--device',default= torch.device('cuda' if torch.cuda.is_ava
 parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 parser.add_argument('--nloop', default=1, type=int, metavar='N',
                     help='Number of train loops contrastive learning training.')
+parser.add_argument('--comparison', action='store_true',
+                    help='use the comparision methods')
+parser.add_argument('--nosupervised', action='store_true',
+                    help='use the supervised methods')
+parser.add_argument('--method', default="sim_cl", type=str,
+                    help='the comparison methods')
 
 
 def accuracy(output, target, topk=(1,)):
@@ -98,7 +104,10 @@ def train(model, data_train_loader, data_test_loader, args, name):
     result = []
     
     filearg = "{}_ep{:04}bt{}sp{}".format(args.arch, args.mepochs, args.mbatch_size, args.split) #may change by your need
-    log_dir = os.path.join("results", args.dataset_name, "multiclass", str(args.nloop), filearg)
+    if args.comparison:
+        log_dir = os.path.join("results",args.method, args.dataset_name, "multiclass", str(args.nloop), filearg)
+    else:
+        log_dir = os.path.join("results", args.dataset_name, "multiclass", str(args.nloop), filearg)    
     writer = SummaryWriter(log_dir=log_dir)
     # Todo save the config file
 
@@ -186,7 +195,10 @@ def main():
     # reload the checkpoint
     path1 = "{}_ep{:04}bt{}".format(args.arch, args.mepochs, args.mbatch_size)
     filename = "CP_{}ep{:04}bt{}.pth.tar".format(args.arch, args.mepochs, args.mbatch_size)
-    checkpointpath = os.path.join("PretrainModel", args.dataset_name, path1, filename)
+    if args.comparison:
+        checkpointpath = os.path.join("PretrainModel", args.method, args.dataset_name, path1, filename)
+    else:
+        checkpointpath = os.path.join("PretrainModel", args.dataset_name, path1, filename)    
 
     checkpoint = torch.load(checkpointpath, map_location= args.device)  
       
@@ -237,9 +249,11 @@ def main():
     print("CL task")
     train(clmodel, Binary_train_Loader, Binary_test_Loader, args, name = "CL")
 
-    # SUP
-    print("super task")
-    train(supmodel, Binary_train_Loader, Binary_test_Loader, args, name = "SP")
+    # if compare to other methods, we only run the CL. Or close supvised tasks
+    if not args.comparison or not args.nosupervised:
+        # SUP
+        print("super task")
+        train(supmodel, Binary_train_Loader, Binary_test_Loader, args, name = "SP")
 
 
 if __name__ == "__main__":
